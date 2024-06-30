@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 public class GamePanel extends JPanel implements ActionListener {
 	
@@ -14,12 +16,14 @@ public class GamePanel extends JPanel implements ActionListener {
 	private final int[] x = new int[(PANEL_WIDTH*PANEL_HEIGHT)/(UNIT_SIZE*UNIT_SIZE)];
 	private final int[] y = new int[(PANEL_WIDTH*PANEL_HEIGHT)/(UNIT_SIZE*UNIT_SIZE)];
 	private int bodyParts = 6;
+	private char direction = 'R';
 	private Timer timer;
 	
 	public GamePanel() {
 		setPreferredSize(new Dimension(PANEL_WIDTH, PANEL_HEIGHT));
 		setBackground(Color.BLACK);
 		setFocusable(true);
+		addKeyListener(new MyKeyAdapter());
 		initializeSnake();
 		startGame();	
 		
@@ -61,13 +65,55 @@ public class GamePanel extends JPanel implements ActionListener {
 			x[i]=x[i-1];
 			y[i]=y[i-1];
 		}
-		x[0]+=UNIT_SIZE;
+		
+		switch (direction) {
+		case 'U':
+			y[0]-=UNIT_SIZE;
+			break;
+		case 'D':
+			y[0]+=UNIT_SIZE;
+			break;
+		case 'L':
+			x[0]-=UNIT_SIZE;
+			break;
+		case 'R':
+			x[0]+=UNIT_SIZE;
+			break;
+		}
 	}
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		move();
 		repaint();
+		
+	}
+	private class MyKeyAdapter extends KeyAdapter{
+		@Override
+		public void keyPressed(KeyEvent e) {
+			switch (e.getKeyCode()) {
+			case KeyEvent.VK_LEFT:
+				if (direction !='R') {
+					direction = 'L';
+				}
+				break;
+			case KeyEvent.VK_RIGHT:
+				if (direction !='L') {
+					direction = 'R';
+				}
+				break;
+			case KeyEvent.VK_UP:
+				if (direction !='D') {
+					direction = 'U';
+				}
+				break;
+			case KeyEvent.VK_DOWN:
+				if (direction !='U') {
+					direction = 'D';
+				}
+				break;
+			}
+		}
 		
 	}
 

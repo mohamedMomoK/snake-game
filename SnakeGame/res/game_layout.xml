@@ -1,3 +1,12 @@
 <layout>
-	<panel id="gamePanel" width="800" height="600" />
+	<panel id="gamePanel" width="800" height="600" >
+		<!-- Key Bindings -->
+		<KeyBindings>
+			<key action="MOVE_LEFT" keyCode="LEFT"/>
+            <key action="MOVE_RIGHT" keyCode="RIGHT"/>
+            <key action="MOVE_UP" keyCode="UP"/>
+            <key action="MOVE_DOWN" keyCode="DOWN"/>
+		
+		</KeyBindings>
+	</panel>
 </layout>
