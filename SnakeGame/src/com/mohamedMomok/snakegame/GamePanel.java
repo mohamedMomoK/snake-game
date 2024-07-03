@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.Random;
 
 public class GamePanel extends JPanel implements ActionListener {
 	
@@ -16,10 +17,16 @@ public class GamePanel extends JPanel implements ActionListener {
 	private final int[] x = new int[(PANEL_WIDTH*PANEL_HEIGHT)/(UNIT_SIZE*UNIT_SIZE)];
 	private final int[] y = new int[(PANEL_WIDTH*PANEL_HEIGHT)/(UNIT_SIZE*UNIT_SIZE)];
 	private int bodyParts = 6;
+	private int applesEaten;
+	private int appleX;
+	private int appleY;
 	private char direction = 'R';
+	private boolean running = false;
 	private Timer timer;
+	private Random random;
 	
 	public GamePanel() {
+		random = new Random();
 		setPreferredSize(new Dimension(PANEL_WIDTH, PANEL_HEIGHT));
 		setBackground(Color.BLACK);
 		setFocusable(true);
@@ -38,18 +45,32 @@ public class GamePanel extends JPanel implements ActionListener {
 	}
 		
 	private void startGame() {
+		newApple();
+		running = true;
 		timer = new Timer(DELAY, this);
 		timer.start();
 		
 	}
 	
+	private void newApple() {
+		appleX = random.nextInt((int) (PANEL_WIDTH/UNIT_SIZE))* UNIT_SIZE;
+		appleY = random.nextInt((int) (PANEL_HEIGHT/UNIT_SIZE))* UNIT_SIZE;
+	}
+	
 	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		draw(g);
+		if(running) {
+			draw(g);
+			
+		}else {
+			gameOver(g);
+		}
 	}
 	
 	private void draw(Graphics g) {
+		g.setColor(Color.RED);
+		g.fillOval(appleX, appleY, UNIT_SIZE, UNIT_SIZE);
 		for (int i =0; i<bodyParts; i++) {
 			if (i==0) {
 				g.setColor(Color.GREEN);
@@ -82,11 +103,66 @@ public class GamePanel extends JPanel implements ActionListener {
 		}
 	}
 	
+	private void checkApple() {
+		if((x[0]==appleX) && (y[0]==appleY)) {
+			bodyParts++;
+			applesEaten++;
+			newApple();
+		}
+	}
+	
+	private void checkCollisions() {
+		// Check if head collides with body
+        for (int i = bodyParts; i > 0; i--) {
+            if ((x[0] == x[i]) && (y[0] == y[i])) {
+                running = false;
+            }
+        }
+
+        // Check if head touches left border
+        if (x[0] < 0) {
+            running = false;
+        }
+
+        // Check if head touches right border
+        if (x[0] >= PANEL_WIDTH) {
+            running = false;
+        }
+
+        // Check if head touches top border
+        if (y[0] < 0) {
+            running = false;
+        }
+
+        // Check if head touches bottom border
+        if (y[0] >= PANEL_HEIGHT) {
+            running = false;
+        }
+
+        if (!running) {
+            timer.stop();
+        }
+		
+	}
+	
+	private void gameOver(Graphics g) {
+		// Game Over text
+        g.setColor(Color.RED);
+        g.setFont(new Font("Ink Free", Font.BOLD, 75));
+        FontMetrics metrics = getFontMetrics(g.getFont());
+        g.drawString("Game Over", (PANEL_WIDTH - metrics.stringWidth("Game Over")) / 2, PANEL_HEIGHT / 2);
+		
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		move();
-		repaint();
+		if(running) {
+			move();
+			checkApple();
+			checkCollisions();
 		
+		}
+		repaint();
 	}
 	private class MyKeyAdapter extends KeyAdapter{
 		@Override
